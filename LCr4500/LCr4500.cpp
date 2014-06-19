@@ -15,8 +15,8 @@ enum LCrCommand {
     CMD_RESET,						// Reboot, wait 10 seconds, unit is automatically in "video" mode.
     CMD_STANDBY,					// Power down, LEDs off.
     CMD_NOT_STANDBY,				// Power up
-    CMD_MODE_STRUCTURED_LIGHT,		// 912x1140 display ONLY.  No scaling, no color processing.  We use this mode.
-    CMD_MODE_VIDEO					// Normal video output, with scaling and color processing.  We use this for testing only.
+    CMD_MODE_PATTERN_SEQUENCE,		// 912x1140 display ONLY.  No scaling, no color processing.
+    CMD_MODE_VIDEO					// Normal video output, with scaling and color processing.
 } ;
 
 static struct {
@@ -39,7 +39,7 @@ int _tmain(int argc, _TCHAR* argv[])
     GlobalOptions.Grayscale = true;
     GlobalOptions.ShowStatus = false;
     GlobalOptions.ShowVersion = false;
-    GlobalOptions.Command = CMD_MODE_STRUCTURED_LIGHT;
+    GlobalOptions.Command = CMD_MODE_PATTERN_SEQUENCE;
 
     while (1)
     {
@@ -135,9 +135,9 @@ int _tmain(int argc, _TCHAR* argv[])
                 {
                     GlobalOptions.Command = CMD_MODE_VIDEO;
                 }
-                else if ((optarg[0]) == _T('s'))	// "structured light" or "sl"
+                else if (wcscmp(optarg, _T("ps")) == 0)	// "ps for pattern sequence mode"
                 {
-                    GlobalOptions.Command = CMD_MODE_STRUCTURED_LIGHT;
+                    GlobalOptions.Command = CMD_MODE_PATTERN_SEQUENCE;
                 }
                 else if ((optarg[0]) == _T('n'))	// "NO CHANGE, READ STATUS ONLY"
                 {
@@ -149,9 +149,8 @@ int _tmain(int argc, _TCHAR* argv[])
         case '?':
         case 'h':
         default:
-            _tprintf(_T("\nusage: --color [RGB|R|B|G|W] --mode [video|structuredlight|reset|powerdown|powerup|noChange] --status --version \n"));
-            _tprintf(_T("       no parameters is same as --color W --mode structuredlight\n"));
-            _tprintf(_T("       parameters can be abbreviated to a single character, unless first character options are not unique"));
+            _tprintf(_T("\narguments: --color [RGB|R|B|G|W] --mode [video|ps|reset|powerdown|powerup|noChange] --status --version \n"));
+            _tprintf(_T("       no parameters is same as --color W --mode ps\n"));
             return -1;
             break;
 
@@ -175,8 +174,8 @@ int _tmain(int argc, _TCHAR* argv[])
         case CMD_STATUS:						// just display status
             // nothing to do
             break;
-        case CMD_MODE_STRUCTURED_LIGHT:			// 180Hz mode
-            LCr_StructuredLightMode();
+        case CMD_MODE_PATTERN_SEQUENCE:			// 180Hz mode
+            LCr_PatternSequenceMode();
             break;
         case CMD_MODE_VIDEO:					// 60Hz mode
             LCr_StandardVideoMode();
@@ -213,7 +212,7 @@ bool LCr_Connect()
     }
 
     // Display App Version #
-    sprintf_s(versionStr, "DLP LightCrafter 4500 Init - %d.%d\n", APP_VERSION_MAJOR, APP_VERSION_MINOR);
+    sprintf_s(versionStr, "DLP LightCrafter 4500 - %d.%d\n", APP_VERSION_MAJOR, APP_VERSION_MINOR);
     printf(versionStr);
 
     if (USB_IsConnected())
@@ -321,9 +320,9 @@ struct LutEntry {
 };
 
 
-void LCr_StructuredLightMode()
+void LCr_PatternSequenceMode()
 {
-    printf("LCr_StructuredLightMode\n");
+    printf("LCr_PatternSequenceMode\n");
 
     LutEntry LutEntries[] = {
         {
