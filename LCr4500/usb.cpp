@@ -43,12 +43,42 @@ int USB_Exit(void)
     return hid_exit();
 }
 
-int USB_Open()
+int USB_Open(int id)
 {
     // Open the device using the VID, PID,
     // and optionally the Serial number.
-    DeviceHandle = hid_open(MY_VID, MY_PID, NULL);
+	struct hid_device_info *devs, *cur_dev;
 
+	devs = hid_enumerate(MY_VID, MY_PID);
+	cur_dev = devs;
+	
+	int i = 0;
+
+	while (cur_dev) {
+
+		if (wcscmp(cur_dev->product_string, L"DDP442X") == 0)
+		{
+			if (i == id)
+				DeviceHandle = hid_open_path(cur_dev->path);
+
+			printf("Device Found\n  type: %04hx %04hx\n  path: %s\n  serial_number: %ls", cur_dev->vendor_id, cur_dev->product_id, cur_dev->path, cur_dev->serial_number);
+			printf("\n");
+			printf("  Manufacturer: %ls\n", cur_dev->manufacturer_string);
+			printf("  Product:      %ls\n", cur_dev->product_string);
+			printf("  Release:      %hx\n", cur_dev->release_number);
+			printf("  Interface:    %d\n", cur_dev->interface_number);
+			printf("\n");
+
+			i++;
+		}
+
+		cur_dev = cur_dev->next;
+	}
+
+	hid_free_enumeration(devs);
+		
+	//DeviceHandle = hid_open(MY_VID, MY_PID, NULL);
+	
     if(DeviceHandle == NULL)
     {
         USBConnected = false;

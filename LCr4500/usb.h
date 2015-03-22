@@ -17,7 +17,7 @@
 #define MY_VID 0x0451
 #define MY_PID 0x6401
 
-int USB_Open(void);
+int USB_Open(int id);
 bool USB_IsConnected();
 int USB_Write();
 int USB_Read();

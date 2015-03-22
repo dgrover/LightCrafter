@@ -10,6 +10,8 @@
 #define APP_VERSION_MAJOR 1
 #define APP_VERSION_MINOR 1
 
+#define ID 1
+
 enum LCrCommand {
     CMD_STATUS,						// Read status only
     CMD_RESET,						// Reboot, wait 10 seconds, unit is automatically in "video" mode.
@@ -30,15 +32,15 @@ static struct {
     bool RGB;
 } GlobalOptions;
 
-const bool UseGetchar = false;      // wait for carriage return after running command
+const bool UseGetchar = true;      // wait for carriage return after running command
 
 int _tmain(int argc, _TCHAR* argv[])
 {
     int c;
 
     GlobalOptions.Grayscale = true;
-    GlobalOptions.ShowStatus = false;
-    GlobalOptions.ShowVersion = false;
+    GlobalOptions.ShowStatus = true;
+    GlobalOptions.ShowVersion = true;
     GlobalOptions.Command = CMD_MODE_PATTERN_SEQUENCE;
 
     while (1)
@@ -157,7 +159,7 @@ int _tmain(int argc, _TCHAR* argv[])
         }
     }
 
-    if (LCr_Connect())
+    if (LCr_Connect(ID))
     {
         switch (GlobalOptions.Command)
         {
@@ -187,16 +189,17 @@ int _tmain(int argc, _TCHAR* argv[])
             _sleep(1000);
             LCr_Status();
         }
+	}
 
-        if (UseGetchar) getchar();
+	if (UseGetchar) getchar();
 
-        return 0;
-    }
+	//return 0;
+	
     return 1;
 }
 
 
-bool LCr_Connect()
+bool LCr_Connect(int id)
 {
     char versionStr[255];
     unsigned int API_ver, App_ver, SWConfig_ver, SeqConfig_ver;
@@ -205,7 +208,7 @@ bool LCr_Connect()
 
     if (USB_IsConnected())
         USB_Close();
-    if (USB_Open() != 0)
+    if (USB_Open(id) != 0)
     {
         printf("Error, cannot connect to LightCrafter 4500\n");
         return false;
